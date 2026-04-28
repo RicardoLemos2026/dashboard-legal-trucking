@@ -1145,29 +1145,118 @@ function rExec(){
   const bas=D.basica.reduce((s,v)=>s+v,0);
   const minn=D.minimo.reduce((s,v)=>s+v,0);
   const mas=D.master.reduce((s,v)=>s+v,0);
+  const meg=D.mega.reduce((s,v)=>s+v,0);
   const msD=D.real26.filter(v=>v>0).length;
-  const avg=r26t/msD,proj=avg*12;
+  const avg=r26t/msD, proj=avg*12;
   const yoy=(r26t-r25t)/r25t;
-  const ec=eliteCum(),le=ec.filter(v=>v!==null).pop()||ELITE_BASE;
+  const ec=eliteCum(), le=ec.filter(v=>v!==null).pop()||ELITE_BASE;
   const er=D.elite26.filter(v=>v!==null).reduce((s,v)=>s+v,0);
   const ner=D.naelite.filter(v=>v!==null).reduce((s,v)=>s+v,0);
   const pe=(er/(er+ner)*100).toFixed(1);
+  const mLeft=12-msD;
+
+  // T1 subtotals
+  const t1real=D.real26[0]+D.real26[1]+D.real26[2];
+  const t1bas=TS.T1.bas;
+
+  // Abril specific
+  const abrReal=D.real26[3], abrBas=D.basica[3], abrMin=D.minimo[3];
+  const abrPct=(abrReal/abrBas*100).toFixed(1);
+  const abrWeeksLancadas=D.weeks[3].filter(w=>w.r26!==null&&w.r26>0).length;
+  const abrWeeksTotal=D.weeks[3].length;
+  const abrDy=(abrReal-D.real25[3])/D.real25[3];
+
   $e('execContent').innerHTML=`
-  <div class="ec"><h2>📊 Performance T1 2026 — ${msD} meses com dados completos</h2><div class="egrid">
-    <div class="eb" style="background:#f0faf2;border-color:#b7dfc0"><div class="et" style="color:#1b8a2e">✅ Receita Realizada</div><p>Acumulado 2026: <strong>${fmt(r26t)}</strong><br>Mesmo período 2025: <strong>${fmt(r25t)}</strong><br>Crescimento YoY: <strong style="color:${yoy>0?'#1b8a2e':'#c62828'}">${fmtP(yoy)}</strong><br>Média mensal 2026: <strong>${fmt(avg)}</strong></p></div>
-    <div class="eb" style="background:#fffdf0;border-color:#e8d89a"><div class="et" style="color:#c77700">🎯 Atingimento de Metas</div><p>% meta Mínima anual: <strong>${(r26t/minn*100).toFixed(1)}%</strong><br>% meta Básica anual: <strong>${(r26t/bas*100).toFixed(1)}%</strong><br>T1 vs meta Básica T1: <strong>${(r26t/TS.T1.bas*100).toFixed(1)}%</strong><br>T1: <strong style="color:${r26t>=TS.T1.bas?'#1b8a2e':'#c62828'}">${r26t>=TS.T1.bas?'✓ acima da meta Básica':'abaixo da meta Básica'}</strong></p></div>
-    <div class="eb" style="background:#f0f6ff;border-color:#bcd3f5"><div class="et" style="color:#1565c0">📈 Projeção Anual</div><p>Projeção (média×12): <strong>${fmt(proj)}</strong><br>% da meta Básica: <strong>${(proj/bas*100).toFixed(1)}%</strong><br>Situação: <strong style="color:${proj>=bas?'#1b8a2e':'#c62828'}">${proj>=bas?'✓ Na trajetória':'⚠ Abaixo da trajetória'}</strong><br>Faltam ${fmt(bas-r26t)} em ${12-msD} meses</p></div>
-    <div class="eb" style="background:#faf0ff;border-color:#d5b5ef"><div class="et" style="color:#6a1b9a">👥 Base Elite 2026</div><p>Saldo inicial: <strong>${ELITE_BASE} clientes</strong><br>Novos elite T1: <strong>${le-ELITE_BASE} clientes</strong><br>Total acumulado: <strong>${le} clientes</strong><br>Receita elite: <strong>${pe}% do total</strong></p></div>
+  <div class="ec"><h2>📊 Performance Acumulada 2026 — ${msD} meses com dados</h2><div class="egrid">
+    <div class="eb" style="background:#f0faf2;border-color:#b7dfc0">
+      <div class="et" style="color:#1b8a2e">✅ Receita Realizada</div>
+      <p>Acumulado 2026: <strong>${fmt(r26t)}</strong><br>
+      Mesmo período 2025: <strong>${fmt(r25t)}</strong><br>
+      Crescimento YoY: <strong style="color:${yoy>0?'#1b8a2e':'#c62828'}">${fmtP(yoy)}</strong><br>
+      Média mensal 2026: <strong>${fmt(avg)}</strong></p>
+    </div>
+    <div class="eb" style="background:#fffdf0;border-color:#e8d89a">
+      <div class="et" style="color:#c77700">🎯 Atingimento de Metas</div>
+      <p>% meta Mínima anual: <strong>${(r26t/minn*100).toFixed(1)}%</strong><br>
+      % meta Básica anual: <strong>${(r26t/bas*100).toFixed(1)}%</strong><br>
+      T1 vs meta Básica T1: <strong>${(t1real/t1bas*100).toFixed(1)}%</strong>
+      <span style="color:${t1real>=t1bas?'#1b8a2e':'#c62828'}"> (${t1real>=t1bas?'✓ acima':'abaixo'})</span><br>
+      Abril vs meta Básica: <strong style="color:${abrReal>=abrBas?'#1b8a2e':abrReal>=abrMin?'#c77700':'#c62828'}">${abrPct}%</strong>
+      <span style="font-size:11px;color:#8a9ab0"> (${abrWeeksLancadas}/${abrWeeksTotal} semanas)</span></p>
+    </div>
+    <div class="eb" style="background:#f0f6ff;border-color:#bcd3f5">
+      <div class="et" style="color:#1565c0">📈 Projeção Anual</div>
+      <p>Projeção (média×12): <strong>${fmt(proj)}</strong><br>
+      % da meta Básica: <strong>${(proj/bas*100).toFixed(1)}%</strong><br>
+      Situação: <strong style="color:${proj>=bas?'#1b8a2e':'#c62828'}">${proj>=bas?'✓ Na trajetória':'⚠ Abaixo da trajetória'}</strong><br>
+      Faltam <strong>${fmt(bas-r26t)}</strong> em ${mLeft} meses</p>
+    </div>
+    <div class="eb" style="background:#faf0ff;border-color:#d5b5ef">
+      <div class="et" style="color:#6a1b9a">👥 Base Elite 2026</div>
+      <p>Saldo inicial: <strong>${ELITE_BASE} clientes</strong><br>
+      Novos elite (T1+Abr): <strong>${le-ELITE_BASE} clientes</strong><br>
+      Total acumulado: <strong>${le} clientes</strong><br>
+      Receita elite: <strong>${pe}% do total</strong> (${fmt(er)})</p>
+    </div>
   </div></div>
+
   <div class="ec"><h2>📅 Análise Mês a Mês — 2026</h2><div class="egrid">
-    ${['Janeiro','Fevereiro','Março'].map(m=>{const i=MONTHS.indexOf(m);const r=D.real26[i],meta=D.basica[i],pct=r/meta,dy=(D.real26[i]-D.real25[i])/D.real25[i];return`<div class="eb" style="background:#fafbfc;border-color:${pct>=1?'#b7dfc0':'#f5c6c6'}"><div class="et" style="color:#0d1f35">${m}</div><p>Realizado: <strong>${fmt(r)}</strong><br>Meta Básica: ${fmts(meta)}<br>Atingimento: <strong style="color:${pct>=1?'#1b8a2e':pct>=0.75?'#c77700':'#c62828'}">${(pct*100).toFixed(1)}%</strong><br>vs ${m.slice(0,3)}/2025: <strong style="color:${dy>0?'#1b8a2e':'#c62828'}">${fmtP(dy)}</strong></p></div>`;}).join('')}
-    <div class="eb" style="background:#fafbfc;border-color:#fdd9a0"><div class="et" style="color:#0d1f35">Abril (parcial — 1 a 3/abr)</div><p>Semana 1–3: <strong>${fmt(D.real26[3])}</strong><br>Meta semana Básica: ${fmts(D.weeks[3][0].bas)}<br>Atingimento: <strong style="color:${D.real26[3]>=D.weeks[3][0].bas?'#1b8a2e':'#c62828'}">${(D.real26[3]/D.weeks[3][0].bas*100).toFixed(1)}%</strong><br><span style="color:#8a9ab0">4 semanas restantes</span></p></div>
+    ${[
+      {m:'Janeiro',  note:'Abaixo da meta Mínima. Único mês crítico — planejar pipeline em dez/ano anterior.'},
+      {m:'Fevereiro',note:'Melhor resultado relativo do período: acima da meta Master. 17 novos clientes.'},
+      {m:'Março',    note:'Acima da Básica, próximo da Master. Recorde de captação: 7 elite + 24 novos clientes.'},
+    ].map(({m,note})=>{
+      const i=MONTHS.indexOf(m);
+      const r=D.real26[i],meta=D.basica[i],pct=r/meta,dy=(D.real26[i]-D.real25[i])/D.real25[i];
+      const borderCol=r>=D.master[i]?'#9fd4a3':r>=meta?'#b7dfc0':r>=D.minimo[i]?'#fdd9a0':'#f5c6c6';
+      return`<div class="eb" style="background:#fafbfc;border-color:${borderCol}">
+        <div class="et" style="color:#0d1f35">${m}</div>
+        <p>Realizado: <strong>${fmt(r)}</strong><br>
+        Meta Básica: ${fmts(meta)}<br>
+        Atingimento: <strong style="color:${pct>=1?'#1b8a2e':pct>=0.75?'#c77700':'#c62828'}">${(pct*100).toFixed(1)}%</strong><br>
+        vs ${m.slice(0,3)}/2025: <strong style="color:${dy>0?'#1b8a2e':'#c62828'}">${fmtP(dy)}</strong><br>
+        <span style="font-size:11px;color:#8a9ab0;margin-top:4px;display:block">${note}</span></p>
+      </div>`;
+    }).join('')}
+    <div class="eb" style="background:#fafbfc;border-color:#fdd9a0">
+      <div class="et" style="color:#0d1f35">Abril — ${abrWeeksLancadas}/${abrWeeksTotal} semanas lançadas</div>
+      <p>Realizado parcial: <strong>${fmt(abrReal)}</strong><br>
+      Meta Básica: ${fmts(abrBas)}<br>
+      Atingimento: <strong style="color:${abrReal>=abrBas?'#1b8a2e':abrReal>=abrMin?'#c77700':'#c62828'}">${abrPct}%</strong><br>
+      vs Abr/2025: <strong style="color:${abrDy>0?'#1b8a2e':'#c62828'}">${fmtP(abrDy)}</strong><br>
+      <span style="font-size:11px;color:#8a9ab0;margin-top:4px;display:block">Semana "25 a 30" ainda pendente. 18 novos clientes no mês.</span></p>
+    </div>
   </div></div>
+
   <div class="ec"><h2>🔮 Cenários para Fechar 2026</h2><div class="egrid">
-    <div class="eb" style="background:#f0faf2;border-color:#b7dfc0"><div class="et" style="color:#1b8a2e">Otimista — Master</div><p>Meta: <strong>${fmt(mas)}</strong><br>Realizado: <strong>${fmt(r26t)}</strong><br>Faltam: <strong>${fmt(mas-r26t)}</strong> em ${12-msD}m<br>Necessário/mês: <strong>${fmt((mas-r26t)/(12-msD))}</strong></p></div>
-    <div class="eb" style="background:#fffdf0;border-color:#e8d89a"><div class="et" style="color:#c77700">Base — Básica</div><p>Meta: <strong>${fmt(bas)}</strong><br>Realizado: <strong>${fmt(r26t)}</strong><br>Faltam: <strong>${fmt(bas-r26t)}</strong> em ${12-msD}m<br>Necessário/mês: <strong>${fmt((bas-r26t)/(12-msD))}</strong></p></div>
-    <div class="eb" style="background:#fdf4f4;border-color:#f5c6c6"><div class="et" style="color:#c62828">Conservador — Mínimo</div><p>Meta: <strong>${fmt(minn)}</strong><br>Realizado: <strong>${fmt(r26t)}</strong><br>Faltam: <strong>${fmt(minn-r26t)}</strong> em ${12-msD}m<br>Necessário/mês: <strong>${fmt((minn-r26t)/(12-msD))}</strong></p></div>
-    <div class="eb" style="background:#f0f0ff;border-color:#c0c0e8"><div class="et" style="color:#4527a0">Benchmark vs 2025</div><p>Total 2025: <strong>$502.2k</strong><br>Projeção 2026: <strong>${fmt(proj)}</strong><br>Crescimento: <strong style="color:${proj>502186?'#1b8a2e':'#c62828'}">${((proj-502186)/502186*100).toFixed(1)}%</strong><br>${proj>bas?'✓ Acima da meta Básica':'⚠ Verificar ritmo'}</p></div>
+    <div class="eb" style="background:#f0faf2;border-color:#b7dfc0">
+      <div class="et" style="color:#1b8a2e">Otimista — Master</div>
+      <p>Meta anual: <strong>${fmt(mas)}</strong><br>
+      Realizado: <strong>${fmt(r26t)}</strong><br>
+      Faltam: <strong>${fmt(mas-r26t)}</strong> em ${mLeft}m<br>
+      Necessário/mês: <strong>${fmt((mas-r26t)/mLeft)}</strong></p>
+    </div>
+    <div class="eb" style="background:#fffdf0;border-color:#e8d89a">
+      <div class="et" style="color:#c77700">Base — Básica</div>
+      <p>Meta anual: <strong>${fmt(bas)}</strong><br>
+      Realizado: <strong>${fmt(r26t)}</strong><br>
+      Faltam: <strong>${fmt(bas-r26t)}</strong> em ${mLeft}m<br>
+      Necessário/mês: <strong>${fmt((bas-r26t)/mLeft)}</strong></p>
+    </div>
+    <div class="eb" style="background:#fdf4f4;border-color:#f5c6c6">
+      <div class="et" style="color:#c62828">Conservador — Mínimo</div>
+      <p>Meta anual: <strong>${fmt(minn)}</strong><br>
+      Realizado: <strong>${fmt(r26t)}</strong><br>
+      Faltam: <strong>${fmt(minn-r26t)}</strong> em ${mLeft}m<br>
+      Necessário/mês: <strong>${fmt((minn-r26t)/mLeft)}</strong></p>
+    </div>
+    <div class="eb" style="background:#f0f0ff;border-color:#c0c0e8">
+      <div class="et" style="color:#4527a0">Benchmark vs 2025</div>
+      <p>Total 2025: <strong>$502.2k</strong><br>
+      Projeção 2026: <strong>${fmt(proj)}</strong><br>
+      Crescimento: <strong style="color:${proj>502186?'#1b8a2e':'#c62828'}">${((proj-502186)/502186*100).toFixed(1)}%</strong><br>
+      <span style="color:${proj>=bas?'#1b8a2e':'#c77700'}">${proj>=bas?'✓ Projeção acima da meta Básica':'⚠ Ritmo atual ligeiramente abaixo da Básica'}</span></p>
+    </div>
   </div></div>`;
 }
 
@@ -1178,21 +1267,73 @@ function rAlerts(){
   const r26t=D.real26.reduce((s,v)=>s+v,0);
   const bas=D.basica.reduce((s,v)=>s+v,0);
   const msD=D.real26.filter(v=>v>0).length;
+  const mLeft=12-msD;
   const le=(eliteCum().filter(v=>v!==null).pop()||ELITE_BASE);
+  const needed=((bas-r26t)/mLeft);
+
+  // Abril metrics
+  const abrReal=D.real26[3], abrBas=D.basica[3], abrMin=D.minimo[3];
+  const abrFalta=abrBas-abrReal;
+  const abrSemanaFalta=D.weeks[3].filter(w=>w.r26===null||w.r26===0);
+
+  // Elite concentration
+  const er=D.elite26.filter(v=>v!==null).reduce((s,v)=>s+v,0);
+  const ner=D.naelite.filter(v=>v!==null).reduce((s,v)=>s+v,0);
+  const pctNaoElite=(ner/(er+ner)*100).toFixed(0);
+
   $e('alertsContent').innerHTML=`
   <div class="ec"><h2>🚨 Pontos de Atenção</h2><div class="agrid">
-    <div class="ai ad"><div class="at">⛔ Janeiro — Abaixo do Mínimo</div><p>Janeiro ($57.7k) ficou abaixo da meta Mínima ($63.6k). Único mês crítico do período. Planejar pipeline com antecedência no dezembro anterior.</p></div>
-    <div class="ai ad"><div class="at">⛔ Abril — Apenas semana 1–3 lançada</div><p>Somente $7.1k registrado. Meta mensal Básica é $58.8k. As 4 semanas restantes precisam gerar em média <strong>${fmt((D.basica[3]-D.real26[3])/(D.weeks[3].length-1))}/semana</strong> para bater a meta.</p></div>
-    <div class="ai aw"><div class="at">⚠ T2, T3 e T4 — Sem dados 2026</div><p>9 meses pendentes. Para fechar na meta Básica, é necessário <strong>${fmt((bas-r26t)/(12-msD))}/mês</strong> nos próximos ${12-msD} meses.</p></div>
-    <div class="ai aw"><div class="at">⚠ Concentração em Não-Elite</div><p>Jan (76% não-elite), Fev (69% não-elite). Clientes Elite têm ticket maior e recorrência. Estratégia de conversão elite deve ser priorizada.</p></div>
+    <div class="ai ad">
+      <div class="at">⛔ Janeiro — Abaixo do Mínimo</div>
+      <p>Janeiro ($57.7k) ficou <strong>abaixo da meta Mínima ($63.6k)</strong> — déficit de $5.9k. Único mês de resultado crítico. Estratégia de início de ano precisa ser reforçada: pipeline deve ser construído ainda em dezembro.</p>
+    </div>
+    <div class="ai ad">
+      <div class="at">⛔ Abril — Semana "25 a 30" pendente</div>
+      <p>4 de 5 semanas lançadas: $41.9k de $58.8k (71.2% da Básica). A última semana precisa gerar <strong>${fmt(abrFalta)}</strong> para atingir a Básica — valor acima da média semanal do mês. Abaixo da meta Mínima ($53.5k) enquanto parcial.</p>
+    </div>
+    <div class="ai aw">
+      <div class="at">⚠ Maio a Dezembro — Sem dados 2026</div>
+      <p>${mLeft} meses ainda pendentes. Para fechar o ano na meta Básica, é necessário uma média de <strong>${fmt(needed)}/mês</strong> — ligeiramente acima da média atual de $50.2k. O ritmo precisa ser mantido ou acelerado.</p>
+    </div>
+    <div class="ai aw">
+      <div class="at">⚠ Abril abaixo do ritmo esperado vs 2025</div>
+      <p>Abril 2026 ($41.9k parcial) vs Abril 2025 ($48.6k): <strong>-13.8% YoY</strong> até agora. Com a semana final, o mês pode recuperar parte desse gap, mas a tendência de queda em relação a 2025 merece atenção no T2.</p>
+    </div>
+    <div class="ai aw">
+      <div class="at">⚠ Concentração em receita Não-Elite (${pctNaoElite}%)</div>
+      <p>Dos 4 meses com dados, ${pctNaoElite}% da receita veio de clientes Não-Elite. Clientes Elite têm maior ticket médio e recorrência. Abril registrou <strong>0 novos elite</strong> — sinal de alerta para o T2.</p>
+    </div>
+    <div class="ai aw">
+      <div class="at">⚠ Projeção anual na fronteira da meta Básica</div>
+      <p>Projeção atual: $602.4k vs meta Básica de $607.6k — diferença de apenas <strong>$5.2k</strong> (0.9%). Qualquer mês abaixo da média coloca o ano em risco. Consistência mensal é crítica daqui em diante.</p>
+    </div>
   </div></div>
+
   <div class="ec"><h2>💡 Oportunidades &amp; Alavancas</h2><div class="agrid">
-    <div class="ai ao"><div class="at">✅ T1 próximo da meta Básica (95%)</div><p>T1 2026: $158.9k vs meta Básica T1 de $167.4k. Fevereiro e Março bateram a meta Master — ritmo a ser mantido no T2.</p></div>
-    <div class="ai ao"><div class="at">✅ Crescimento forte em Fev e Mar</div><p>Fevereiro (+25.3%) e Março (+26%) vs 2025. Analisar o que gerou esses picos e replicar a estratégia comercial nos meses seguintes.</p></div>
-    <div class="ai an"><div class="at">📌 Base Elite sólida (${le} clientes)</div><p>60 de saldo inicial + 10 novos no T1. Ações de upsell e retenção elevam receita recorrente sem depender de novos clientes.</p></div>
-    <div class="ai an"><div class="at">📌 Março — Recorde Elite (7 novos)</div><p>7x Fevereiro e 7x Janeiro. Identificar a ação comercial e criar processo replicável para os meses seguintes.</p></div>
-    <div class="ai an"><div class="at">📌 Outubro — Maior meta do ano</div><p>Meta Básica de $66.3k exige +21% vs Out/2025. Antecipar ações a partir de agosto para construir pipeline suficiente.</p></div>
-    <div class="ai ao"><div class="at">✅ Março — Recorde de novos clientes (24)</div><p>Superou 2025 (20) e 2024 (22). Mais clientes criam pipeline de receita recorrente para os próximos meses.</p></div>
+    <div class="ai ao">
+      <div class="at">✅ Crescimento YoY de 7.4% acumulado</div>
+      <p>$200.8k em 2026 vs $187.0k no mesmo período de 2025 — crescimento de <strong>+7.4%</strong>. Fevereiro (+25.3%) e Março (+26%) puxaram o resultado. Replicar as estratégias desses meses é a maior alavanca disponível.</p>
+    </div>
+    <div class="ai ao">
+      <div class="at">✅ Março — Melhor mês do período</div>
+      <p>$56.5k realizados, acima da meta Básica ($54.2k) e próximo do Master ($59.7k). 24 novos clientes (recorde) e 7 novos elite. Identificar e documentar o que funcionou em março para aplicar nos próximos meses.</p>
+    </div>
+    <div class="ai ao">
+      <div class="at">✅ 18 novos clientes em Abril</div>
+      <p>Apesar do faturamento abaixo da meta, Abril trouxe 18 novos clientes — acima da média mensal. Esses clientes criam <strong>pipeline de receita recorrente</strong> para os meses seguintes de Maio em diante.</p>
+    </div>
+    <div class="ai an">
+      <div class="at">📌 Base Elite de ${le} clientes — alavanca de upsell</div>
+      <p>Com ${ELITE_BASE} de saldo inicial + 10 novos no período, a base Elite tem ${le} clientes. Ações de upsell, cross-sell e retenção dessa base podem elevar significativamente a receita recorrente sem custo de aquisição.</p>
+    </div>
+    <div class="ai an">
+      <div class="at">📌 Estratégia Elite: prioridade para T2</div>
+      <p>Abril teve <strong>0 novos clientes elite</strong>. Março teve 7 — o maior resultado do ano. Analisar o que gerou esse resultado em março e criar um processo replicável é crítico. Meta sugerida: mínimo 3 novos elite/mês.</p>
+    </div>
+    <div class="ai an">
+      <div class="at">📌 Outubro — Maior meta do ano ($66.3k)</div>
+      <p>A meta de outubro exige +21% vs Out/2025 ($54.8k). Pipeline para outubro precisa começar a ser construído <strong>agora</strong> — ações de prospecção em Maio/Junho garantem conversões em setembro/outubro.</p>
+    </div>
   </div></div>`;
 }
 
