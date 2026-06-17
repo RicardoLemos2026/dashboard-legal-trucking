@@ -1867,7 +1867,7 @@ function renderDocFolder(category, files){
   files.forEach(f => {
     const icon = docIcon(f.name);
     const size = fmtFileSize(f.size);
-    const link = f.html_url || f.download_url || '#';
+    const link = f.download_url || f.html_url || '#';
     html += '<a class="doc-item" href="' + link + '" target="_blank" rel="noopener">' +
       '<span class="doc-item-ic">' + icon + '</span>' +
       '<span class="doc-item-name" title="' + f.name + '">' + f.name + '</span>' +
